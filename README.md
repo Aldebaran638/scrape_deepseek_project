@@ -8,8 +8,10 @@ scrape_deepseek_project/
   scrapling_modules/
     sulwhasoo_scrapling_module.py
     thesaemcosmetic_scrapling_module.py
-  deepseek_module.py
-  deepseek_prompt.md
+  deepseek模块文件夹/
+    __init__.py
+    deepseek_module.py
+    deepseek_prompt.md
   requirements.txt
   tests/
     test_all.py

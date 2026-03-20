@@ -1,31 +1,49 @@
 from __future__ import annotations
 
-# 本模块用于抓取 Sulwhasoo（雪花秀）商品页面中的价格与容量相关信息。
-# 说明：
-# 1. 默认抓取商品价格容器（.prd-price-wrap.color-chip-none）。
-# 2. 优先使用 DynamicFetcher（动态渲染）；失败后自动回退到 Fetcher（静态抓取）。
-# 3. 返回结构化结果，便于后续传给下游模型或入库处理。
+"""
+Sulwhasoo 抓取模块。
+
+目标：
+1. 抓取商品价格/容量信息所在区域（默认 `.prd-price-wrap.color-chip-none`）。
+2. 优先使用 DynamicFetcher（支持动态渲染），失败后回退到 Fetcher（静态请求）。
+3. 返回统一结构，便于 main.py 汇总与后续模型处理。
+
+返回结构：
+- url: 当前抓取地址
+- source: 实际使用的抓取器（DynamicFetcher 或 Fetcher (fallback)）
+- dynamic_error: 动态抓取失败时的错误信息，成功时为空字符串
+- all_texts: 容器内清洗后的文本列表
+- joined_text: all_texts 的拼接文本（" | " 分隔）
+- price_candidates: 从 data-price 属性提取的价格候选
+- amount_candidates: 从 data-sapcd 节点提取的容量候选
+"""
 
 import re
 from typing import Any, Iterable
 
 from scrapling.fetchers import Fetcher
 
+# 注意：不能在 fallback 类里直接引用 `except ... as import_exc` 变量。
+# Python 会在 except 块结束后清理该变量，导致后续访问时报 NameError。
+_dynamic_import_error = ""
 try:
     from scrapling.fetchers import DynamicFetcher
 except Exception as import_exc:
+    _dynamic_import_error = str(import_exc)
+
     class DynamicFetcher:  # type: ignore[no-redef]
-        """Fallback shim when optional dynamic dependencies are unavailable."""
+        """当 DynamicFetcher 依赖不可用时的占位回退类。"""
 
         @staticmethod
         def fetch(*args: Any, **kwargs: Any) -> Any:
-            raise RuntimeError(f"Dynamic fetcher is unavailable: {import_exc}")
+            raise RuntimeError(f"Dynamic fetcher is unavailable: {_dynamic_import_error}")
+
 
 DEFAULT_CONTAINER = ".prd-price-wrap.color-chip-none"
 
 
 def normalize_texts(texts: Iterable[str]) -> list[str]:
-    """Normalize whitespace and drop empty strings."""
+    """压缩空白并过滤空字符串，保持原始顺序。"""
     result: list[str] = []
     for t in texts:
         t = re.sub(r"\s+", " ", t).strip()
@@ -35,7 +53,13 @@ def normalize_texts(texts: Iterable[str]) -> list[str]:
 
 
 def extract_from_page(page: Any, container_selector: str = DEFAULT_CONTAINER) -> dict[str, list[str] | str]:
-    """Extract text and numeric candidates from the target container."""
+    """
+    从目标容器提取文本与候选字段。
+
+    回退策略：
+    - 先使用 `container_selector`
+    - 若未命中，再尝试 `.prd-price-wrap`
+    """
     block = page.css(container_selector).first or page.css(".prd-price-wrap").first
     if not block:
         return {"all_texts": [], "joined_text": "", "price_candidates": [], "amount_candidates": []}
@@ -53,7 +77,13 @@ def extract_from_page(page: Any, container_selector: str = DEFAULT_CONTAINER) ->
 
 
 def scrape_url(url: str, container_selector: str = DEFAULT_CONTAINER) -> dict[str, Any]:
-    """Scrape URL and return structured extraction output."""
+    """
+    抓取 URL 并输出结构化结果。
+
+    执行流程：
+    1. 先尝试 DynamicFetcher.fetch(...)
+    2. 若抛异常，则改用 Fetcher.get(...) 并记录 dynamic_error
+    """
     try:
         page = DynamicFetcher.fetch(url, network_idle=True, timeout=60_000, verify=False)
         source = "DynamicFetcher"

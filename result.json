@@ -6,11 +6,13 @@
   "modules": {
     "sulwhasoo": {
       "url": "https://www.sulwhasoo.com/kr/ko/products/concentrated-ginseng-rejuvenating-ampoule.html",
-      "source": "Fetcher (fallback)",
-      "dynamic_error": "name 'import_exc' is not defined",
+      "source": "DynamicFetcher",
+      "dynamic_error": "",
       "all_texts": [
+        "150,000",
         "원",
         "용량",
+        "20g",
         "피부타입",
         "모든피부",
         "피부 베네핏",
@@ -18,14 +20,18 @@
         "기능성",
         "주름개선기능성"
       ],
-      "joined_text": "원 | 용량 | 피부타입 | 모든피부 | 피부 베네핏 | 탄력, 자생, 리프팅, 주름 | 기능성 | 주름개선기능성",
-      "price_candidates": [],
-      "amount_candidates": []
+      "joined_text": "150,000 | 원 | 용량 | 20g | 피부타입 | 모든피부 | 피부 베네핏 | 탄력, 자생, 리프팅, 주름 | 기능성 | 주름개선기능성",
+      "price_candidates": [
+        "150,000"
+      ],
+      "amount_candidates": [
+        "20g"
+      ]
     },
     "thesaem_detail_infor": {
       "url": "https://www.thesaemcosmetic.com/product/item.php?it_id=1703575270",
-      "source": "Fetcher (fallback)",
-      "dynamic_error": "name 'import_exc' is not defined",
+      "source": "DynamicFetcher",
+      "dynamic_error": "",
       "title": "상품정보고시",
       "fields": [
         {
