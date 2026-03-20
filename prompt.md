@@ -16,7 +16,7 @@ https://www.sulwhasoo.com/kr/ko/products/skincare/skincare.html?page=1
     反之如果存在,则进行原列表抓取逻辑(将页面下所有li元素中的a链接的产品信息抓取一遍)
 
 
-我要求编写一个新模块,用来专门列表式抓取https://www.thesaemcosmetic.com/网站的内容。 
+- 我要求编写一个新模块,用来专门列表式抓取https://www.thesaemcosmetic.com/网站的内容。 
 新模块抓取的链接格式是：
 https://www.thesaemcosmetic.com/product/index.php?&sort=&sca=&page=1
 

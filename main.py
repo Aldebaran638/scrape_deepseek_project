@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import os
+from pathlib import Path
 from typing import Any
 
 from deepseek_modules.deepseek_module import DeepSeekConfig, run_deepseek
@@ -32,6 +33,19 @@ def build_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def _save_result_json(data: dict[str, Any], output_path: str = "result.json") -> None:
+    """
+    Persist intermediate/final scrape data to JSON.
+
+    Use atomic replace to avoid half-written files on interruption.
+    """
+    target = Path(output_path)
+    tmp = target.with_suffix(target.suffix + ".tmp")
+    with tmp.open("w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+    tmp.replace(target)
+
+
 def main() -> None:
     args = build_args()
     if not args.api_key:
@@ -49,6 +63,7 @@ def main() -> None:
         },
         "modules": modules,
     }
+    _save_result_json(scraped_data)
 
     try:
         sulwhasoo_data = scrape_sulwhasoo(
@@ -59,6 +74,7 @@ def main() -> None:
         modules["sulwhasoo"] = sulwhasoo_data
     except Exception as exc:
         modules["sulwhasoo"] = {"error": str(exc)}
+    _save_result_json(scraped_data)
 
     try:
         thesaem_data = scrape_thesaem(
@@ -70,9 +86,7 @@ def main() -> None:
         modules["thesaem"] = thesaem_data
     except Exception as exc:
         modules["thesaem"] = {"error": str(exc)}
-
-    with open("result.json", "w", encoding="utf-8") as f:
-        json.dump(scraped_data, f, ensure_ascii=False, indent=2)
+    _save_result_json(scraped_data)
     # AI翻译 
     print("AI model is thinking...")
     cfg = DeepSeekConfig(
