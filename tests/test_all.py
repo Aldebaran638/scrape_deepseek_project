@@ -22,7 +22,9 @@ def run_all_tests() -> int:
     module_names = [
         "tests.test_deepseek_module",
         "tests.test_sulwhasoo_scrapling_module",
+        "tests.test_sulwhasoo_product_list_scrapling_module",
         "tests.test_thesaemcosmetic_scrapling_module",
+        "tests.test_thesaemcosmetic_product_list_scrapling_module",
     ]
     suite = unittest.TestSuite()
     for module_name in module_names:

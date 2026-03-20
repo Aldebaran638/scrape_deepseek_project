@@ -15,7 +15,7 @@ from deepseek_modules import deepseek_module
 
 
 class TestDeepSeekModule(unittest.TestCase):
-    @patch("deepseek模块文件夹.deepseek_module.requests.post")
+    @patch("deepseek_modules.deepseek_module.requests.post")
     def test_run_deepseek_success(self, mock_post):
         with tempfile.TemporaryDirectory() as td:
             prompt_path = Path(td) / "prompt.md"
@@ -30,7 +30,7 @@ class TestDeepSeekModule(unittest.TestCase):
             out = deepseek_module.run_deepseek({"x": 1}, prompt_path, cfg)
             self.assertEqual(out, "ok")
 
-    @patch("deepseek模块文件夹.deepseek_module.requests.post")
+    @patch("deepseek_modules.deepseek_module.requests.post")
     def test_run_deepseek_http_error(self, mock_post):
         with tempfile.TemporaryDirectory() as td:
             prompt_path = Path(td) / "prompt.md"
